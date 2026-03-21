@@ -1,0 +1,20 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold" x1="40" y1="24" x2="216" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7BF6E" />
+      <stop offset="0.5" stop-color="#D49444" />
+      <stop offset="1" stop-color="#956031" />
+    </linearGradient>
+    <linearGradient id="gloss" x1="128" y1="18" x2="128" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF0CC" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#FFF2D5" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="54" fill="url(#gold)" />
+  <rect x="13.5" y="13.5" width="229" height="229" rx="52.5" stroke="#FFD7A6" stroke-opacity="0.22" stroke-width="3" />
+  <rect x="22" y="22" width="212" height="96" rx="44" fill="url(#gloss)" />
+  <g fill="#132238">
+    <path d="M101 166L91.4 155.8C87.8 157.5 83.2 158.6 78.4 158.6C56.1 158.6 40 143 40 122.6C40 102.2 56.1 86.6 78.4 86.6C100.7 86.6 116.8 102.2 116.8 122.6C116.8 131.6 113.7 139.6 108.3 145.8L118.8 157L101 166ZM78.4 101.6C65.7 101.6 56.8 110.3 56.8 122.6C56.8 134.9 65.7 143.6 78.4 143.6C91.1 143.6 100 134.9 100 122.6C100 110.3 91.1 101.6 78.4 101.6Z" />
+    <path d="M159 86.8C184.4 86.8 201 101.8 201 126C201 150.2 184.4 165.2 159 165.2H136V86.8H159ZM157.7 102.6H152.8V149.4H157.7C174.1 149.4 184.4 140.7 184.4 126C184.4 111.3 174.1 102.6 157.7 102.6Z" />
+  </g>
+</svg>
