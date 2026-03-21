@@ -39,7 +39,7 @@ export default async function AnalyticsPage() {
     <WorkspaceShell
       currentPath="/analytics"
       title="Analytics and distributions"
-      description="Explore the P/L curve, sizing profile, duration profile, and recurring pain points across the journal."
+      description="Study the P/L curve, sizing profile, duration profile, and recurring pressure points across your journal."
     >
       <AnalyticsWorkspace
         trades={snapshot.trades}

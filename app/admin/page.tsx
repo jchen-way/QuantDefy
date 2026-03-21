@@ -29,12 +29,12 @@ export default async function AdminPage() {
     <WorkspaceShell
       currentPath="/admin"
       title="Admin"
-      description="Monitor premium semantic refresh usage across accounts and verify the current quota policy."
+      description="Monitor premium refresh usage across accounts and keep the current quota policy in view."
     >
       <SectionCard
         title="Semantic refresh usage"
         eyebrow="Per user"
-        description={`Non-admin users can run ${policy.maxRefreshesPerWindow} premium refreshes every ${formatWindow(policy.windowMs)} with a ${formatWindow(policy.cooldownMs)} cooldown between runs. Admin users bypass those limits.`}
+        description={`Non-admin users can run ${policy.maxRefreshesPerWindow} premium refreshes every ${formatWindow(policy.windowMs)} with a ${formatWindow(policy.cooldownMs)} wait between runs. Admin users bypass those limits.`}
       >
         <div className="overflow-x-auto rounded-[1.35rem] border border-white/10 bg-white/[0.03]">
           <div className="grid min-w-[760px] grid-cols-[minmax(0,1.3fr)_minmax(0,1.1fr)_120px_180px] gap-3 border-b border-white/10 px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-white/42">

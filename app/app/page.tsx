@@ -77,12 +77,13 @@ export default async function AppDashboardPage({ searchParams }: AppDashboardPag
         <SectionCard
           title="Your review calendar is ready"
           eyebrow="First week setup"
-          description="This account is fully connected to storage and auth. Log your first trade to start building the calendar, distributions, and insight history."
+          description="Log your first trade to start building the calendar, distributions, and coaching history."
         >
           <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-4">
               <p className="max-w-2xl text-sm leading-7 text-muted">
-                The product surfaces are live now: calendar review, analytics, image-backed trade records, and recurring coaching summaries. They need trade data to become useful.
+                Once trades are in, this becomes your daily review layer: calendar context, trade
+                analytics, screenshot-backed journal entries, and recurring coaching summaries.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -132,7 +133,7 @@ export default async function AppDashboardPage({ searchParams }: AppDashboardPag
       <SectionCard
         title={dashboard.monthLabel}
         eyebrow="Calendar"
-        description="Each day cell uses realized P/L from closed trades. Click into any day to inspect the exact journal entries and review notes."
+        description="Each day rolls up realized P/L from closed trades. Open any day to inspect the journal entries and review notes behind it."
       >
         <CalendarDashboard
           calendarDays={dashboard.calendarDays}

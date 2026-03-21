@@ -138,7 +138,7 @@ export default async function InsightsPage() {
       description={
         semanticPageData
           ? semanticPageData.summary
-          : "A local pattern engine groups similar tags, review notes, and screenshot captions so your coaching layer reflects repeated evidence instead of exact phrase matches."
+          : "The review layer groups similar tags, notes, and screenshot captions so recurring patterns show up even when you do not phrase them the same way every time."
       }
       actions={
         <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -153,7 +153,7 @@ export default async function InsightsPage() {
         <SectionCard
           title="Insights are currently disabled"
           eyebrow="Preferences"
-          description="Turn the hybrid insight layer back on in settings if you want refreshed coaching summaries and recurring theme detection."
+          description="Turn insights back on in settings if you want refreshed coaching summaries and recurring pattern detection."
         >
           <div className="flex flex-wrap gap-3">
             <Link
@@ -170,14 +170,14 @@ export default async function InsightsPage() {
         <SectionCard
           title="No insight data yet"
           eyebrow="First journal week"
-          description="Insights will start to appear after you log trades with fills and mistake or lesson tags."
+          description="Insights start to become useful once you log trades with fills, review notes, and a few consistent tags."
         >
           <div className="grid gap-3 lg:grid-cols-2">
             {[
               "Tag mistakes like chased entry, oversized, hesitation, or boredom.",
               "Tag lessons so the monthly review can surface what is actually working.",
-              "Upload setup and postmortem charts so the review loop stays visual.",
-              "Refresh insights whenever you want a new pass over the current data."
+              "Upload setup and post-trade charts so the review stays visual.",
+              "Refresh insights whenever you want another pass over the current journal."
             ].map((item) => (
               <div
                 key={item}
@@ -194,7 +194,7 @@ export default async function InsightsPage() {
         <SectionCard
           title={semanticPageData.title}
           eyebrow="Premium mode"
-          description="OpenAI-backed review is reading notes, tags, and chart screenshots together to write the current coaching page."
+          description="Premium review reads notes, tags, and chart screenshots together to generate the current coaching page."
         >
           <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
             <div className="space-y-3">

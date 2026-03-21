@@ -29,7 +29,7 @@ export default async function SettingsPage() {
     <WorkspaceShell
       currentPath="/settings"
       title="Settings"
-      description="Personalize journal defaults, timezone behavior, and the taxonomy used to normalize your weekly review language."
+      description="Set your journal defaults, timezone behavior, and the language you want carried through review and insight summaries."
     >
       <SettingsForm settings={settings} semanticInsightsAvailable={semanticInsightsAvailable} />
     </WorkspaceShell>

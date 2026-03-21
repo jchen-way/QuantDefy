@@ -39,7 +39,7 @@ export default async function TradesPage() {
     <WorkspaceShell
       currentPath="/trades"
       title="Trade journal"
-      description="Search, filter, and review every trade with thesis notes, normalized mistake tags, and linked screenshots."
+      description="Search, filter, and review every trade with thesis notes, structured tags, and linked screenshots."
       actions={
         <Link
           href="/trades/new"

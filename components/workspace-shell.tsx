@@ -115,9 +115,9 @@ export async function WorkspaceShell({
               <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/42">Review rhythm</div>
               <div className="mt-4 space-y-3">
                 {[
-                  ["Morning", "Prep levels and thesis."],
-                  ["Close", "Tag mistakes and attach screenshots."],
-                  ["Weekend", "Compare setups, size, and hold duration."]
+                  ["Morning", "Prep levels and refine the day's thesis."],
+                  ["Close", "Tag mistakes and attach the charts worth reviewing."],
+                  ["Weekend", "Compare setups, sizing, and hold quality across the week."]
                 ].map(([label, copy]) => (
                   <div key={label} className="border-l border-white/10 pl-3">
                     <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">{label}</div>

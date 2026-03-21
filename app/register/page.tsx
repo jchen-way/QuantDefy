@@ -19,7 +19,7 @@ export default async function RegisterPage({
     <AuthShell
       mode="register"
       title="Create account"
-      description="Create a private trading journal account backed by a real session and per-user data store."
+      description="Create your private trading journal and start building a consistent review process."
     >
       <AuthEntryForm
         mode="register"

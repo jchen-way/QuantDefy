@@ -19,7 +19,7 @@ export default async function LoginPage({
     <AuthShell
       mode="login"
       title="Sign in"
-      description="Access your journal, daily review calendar, uploads, and analytics with a real account session."
+      description="Access your journal, review calendar, uploads, and analytics from one private workspace."
     >
       <AuthEntryForm
         mode="login"

@@ -4,20 +4,39 @@ import { PublicNavbar } from "@/components/public-navbar";
 
 const featureBlocks = [
   {
-    title: "Calendar P/L mapping",
-    copy: "See winning, flat, and drawdown days at a glance, then drill straight into the trades that produced them."
+    title: "Daily P/L calendar",
+    copy: "Read the month like a scorecard, then open any day to inspect the exact trades behind the move."
   },
   {
-    title: "Structured trade review",
-    copy: "Capture entries, exits, thesis quality, emotions, sizing, and post-trade lessons in one repeatable flow."
+    title: "Structured trade capture",
+    copy: "Log entries, exits, thesis quality, sizing, and post-trade lessons in a format built for review, not bookkeeping."
   },
   {
-    title: "Screenshot evidence",
-    copy: "Upload setup images, winners, losers, and postmortems so your journal is visual, not just textual."
+    title: "Chart-backed journal",
+    copy: "Attach setup charts and post-trade screenshots so every note stays anchored to actual evidence."
   },
   {
-    title: "Insight loops",
-    copy: "Combine deterministic stats with coaching-style summaries to expose recurring pain points in your execution."
+    title: "AI review layer",
+    copy: "Use premium semantic review to connect notes, tags, and screenshots into clearer coaching takeaways."
+  }
+];
+
+const reviewLoopBlocks = [
+  {
+    title: "Context stays intact",
+    copy: "Calendar history, trade notes, screenshots, and coaching stay in one workflow instead of getting split across tools."
+  },
+  {
+    title: "Review gets visual",
+    copy: "Keep the charts that mattered next to the trade itself so post-analysis is faster and more honest."
+  },
+  {
+    title: "Patterns stay visible",
+    copy: "Repeated mistakes and recurring strengths stay visible instead of disappearing into old notes and screenshots."
+  },
+  {
+    title: "Execution gets sharper",
+    copy: "Use the review record to tighten entries, sizing, and exits with feedback grounded in your own trading."
   }
 ];
 
@@ -93,7 +112,7 @@ export default function HomePage() {
       <div className="relative">
         <PublicNavbar />
         <section className="mx-auto max-w-[1380px] px-4 pb-16 pt-8 sm:px-6 lg:pt-12">
-          <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
+          <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:grid-rows-[auto_auto]">
             <div className="space-y-8 xl:max-w-[39rem] xl:pt-6">
               <div className="soft-pill inline-flex items-center rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-[0.24em] text-white/56">
                 Calendar-first trading journal
@@ -103,9 +122,9 @@ export default function HomePage() {
                   Review every trade inside a system that actually teaches you something back.
                 </h1>
                 <p className="max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                  QuantDefy is a private performance workspace for traders who want a real review loop:
-                  day-by-day P/L visibility, structured thesis capture, screenshot evidence, and analytics
-                  that expose what is hurting edge quality.
+                  QuantDefy is a private performance workspace for traders who want a disciplined
+                  review loop: day-by-day P/L visibility, structured trade notes, screenshot
+                  evidence, and analytics that expose what is eroding execution quality.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -121,17 +140,6 @@ export default function HomePage() {
                 >
                   Sign in
                 </Link>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2" id="features">
-                {featureBlocks.map((item) => (
-                  <div
-                    key={item.title}
-                    className="soft-panel rounded-[1.45rem] p-5"
-                  >
-                    <div className="text-lg font-semibold text-white">{item.title}</div>
-                    <p className="mt-2 text-sm leading-6 text-white/60">{item.copy}</p>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -196,13 +204,52 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            <div className="grid h-full auto-rows-fr gap-3 sm:grid-cols-2" id="features">
+              {featureBlocks.map((item) => (
+                <div
+                  key={item.title}
+                  className="soft-panel flex h-full flex-col rounded-[1.45rem] p-5"
+                >
+                  <div className="text-lg font-semibold text-white">{item.title}</div>
+                  <p className="mt-2 text-sm leading-6 text-white/60">{item.copy}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(245,188,117,0.12)] bg-[linear-gradient(180deg,rgba(17,22,34,0.92),rgba(10,14,22,0.78))] p-5 shadow-[0_22px_64px_rgba(0,0,0,0.22)]">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(245,188,117,0.45),transparent)]" />
+              <div className="pointer-events-none absolute -right-14 top-10 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(241,124,71,0.16),transparent_70%)] blur-2xl" />
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#f2c07f]/72">Review stack</div>
+                  <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-white">
+                    Built to keep the whole process in frame.
+                  </div>
+                </div>
+                <div className="hidden rounded-full border border-[rgba(245,188,117,0.18)] bg-[rgba(245,188,117,0.08)] px-3 py-1 text-xs text-[#f3c991] lg:inline-flex">
+                  One workspace
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {reviewLoopBlocks.map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex h-full flex-col rounded-[1.45rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-4"
+                  >
+                    <div className="text-base font-semibold text-white">{item.title}</div>
+                    <p className="mt-2 text-sm leading-6 text-white/60">{item.copy}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <section className="mt-14 grid gap-4 lg:grid-cols-3" id="faq">
             {[
-              ["Why not spreadsheets?", "Because execution review, screenshots, and mistake patterns become fragmented the moment your workflow leaves one system."],
-              ["Does it support images?", "Yes. Capture setups, winners, losers, and postmortems so review stays tied to actual chart evidence."],
-              ["Can it generate insights?", "Yes. Deterministic analytics stay the source of truth, and the insight layer helps surface patterns faster."]
+              ["Why not spreadsheets?", "Because trade review breaks down once calendar context, screenshots, and pattern tracking are scattered across separate tools."],
+              ["Does it support images?", "Yes. Attach setup charts and post-trade screenshots so every journal entry keeps its visual context."],
+              ["Can it generate insights?", "Yes. QuantDefy keeps the stats grounded in your trade data, then surfaces recurring patterns in the review layer."]
             ].map(([title, copy]) => (
               <div key={title} className="soft-panel rounded-[1.6rem] p-6">
                 <div className="text-xl font-semibold text-white">{title}</div>
