@@ -260,15 +260,24 @@ export async function getCurrentUser() {
 
   const session = await getSession(sessionId);
   if (!session) {
+    await clearSessionCookie();
     return null;
   }
 
   if (new Date(session.expiresAt).getTime() <= Date.now()) {
     await deleteSession(session.id);
+    await clearSessionCookie();
     return null;
   }
 
-  return getUserById(session.userId);
+  const user = await getUserById(session.userId);
+  if (!user) {
+    await deleteSession(session.id);
+    await clearSessionCookie();
+    return null;
+  }
+
+  return user;
 }
 
 export async function requireCurrentUser() {

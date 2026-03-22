@@ -16,6 +16,7 @@
 - Shared shells live in `components/public-navbar.tsx`, `components/auth-shell.tsx`, and `components/workspace-shell.tsx`.
 - New Neon-backed accounts start empty; the dashboard, journal, analytics, and insights pages now include first-trade onboarding states instead of relying on seeded demo data.
 - User-facing branding is `QuantDefy`. Keep the warm monogram mark in the shared nav/shell branding and avoid reintroducing old `Trade Logger`, `QuantDesk`, or demo-badge wording.
+- The public landing page now has explicit mobile-specific responsive behavior in `components/public-navbar.tsx` and the landing `preview` variant of `components/calendar-grid.tsx`; avoid assuming the phone layout is just the desktop preview scaled down.
 
 ## Data and analytics
 - Core domain types live in `lib/domain/types.ts`.
@@ -71,6 +72,7 @@
 - Auth forms now preserve submitted non-password fields after validation failures and should return friendlier field-specific copy from `app/auth/actions.ts` instead of raw validator messages.
 - The current storage boundary now cleans up local upload binaries on trade delete, attachment delete, and attachment removal during trade edits so the file runtime does not silently leak orphaned images.
 - Session cookies now use the `quantdefy_session` name while still accepting the older legacy cookie name during the transition.
+- Trade create/detail routes now treat auth lookup failures and store lookup failures as the same data-connection problem path, so Neon outages should degrade to the shared `DataConnectionState` UI instead of crashing before route rendering.
 
 ## Intended next backend direction
 - Use Neon for the production Postgres layer instead of Supabase.
@@ -94,6 +96,7 @@
 
 ## Verification
 - Primary checks are `npm run build`, `npm run typecheck`, and `npm test`.
-- Browser checks are `npm run test:e2e`; Playwright uses `RUNTIME_DATA_DIR=.e2e-runtime`, `UPLOAD_RUNTIME=local`, and an isolated dev server from `playwright.config.ts`.
+- Browser checks are `npm run test:e2e`; Playwright uses `RUNTIME_DATA_DIR=.e2e-runtime`, `UPLOAD_RUNTIME=local`, and an isolated production-style server from `playwright.config.ts` (`npm run build && npm run start`).
+- Playwright also clears optional OAuth/OpenAI env vars in its `webServer.env` block so browser coverage does not drift based on a developer's local secrets.
 - `npm run typecheck` uses `tsconfig.typecheck.json` so it stays stable even when Next auto-rewrites the main `tsconfig.json` include list.
 - `npm test` excludes browser coverage. Run `npm run test:e2e` intentionally when auth/media/settings/insight UI flows are touched.

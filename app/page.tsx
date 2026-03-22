@@ -111,17 +111,17 @@ export default function HomePage() {
       <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px]" />
       <div className="relative">
         <PublicNavbar />
-        <section className="mx-auto max-w-[1380px] px-4 pb-16 pt-8 sm:px-6 lg:pt-12">
-          <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:grid-rows-[auto_auto]">
-            <div className="space-y-8 xl:max-w-[39rem] xl:pt-6">
+        <section className="mx-auto max-w-[1380px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 lg:pt-12">
+          <div className="grid items-start gap-6 sm:gap-8 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:grid-rows-[auto_auto] xl:gap-10">
+            <div className="space-y-6 sm:space-y-8 xl:max-w-[39rem] xl:pt-6">
               <div className="soft-pill inline-flex items-center rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-[0.24em] text-white/56">
                 Calendar-first trading journal
               </div>
-              <div className="space-y-5">
-                <h1 className="max-w-[10ch] text-5xl font-semibold tracking-[-0.08em] text-white sm:text-6xl lg:text-[5.25rem] lg:leading-[0.96]">
+              <div className="space-y-4 sm:space-y-5">
+                <h1 className="max-w-[9.5ch] text-[clamp(3.2rem,14vw,4.75rem)] font-semibold tracking-[-0.08em] leading-[0.9] text-white sm:max-w-[10ch] sm:text-6xl lg:text-[5.25rem] lg:leading-[0.96]">
                   Review every trade inside a system that actually teaches you something back.
                 </h1>
-                <p className="max-w-xl text-base leading-8 text-white/70 sm:text-lg">
+                <p className="max-w-xl text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
                   QuantDefy is a private performance workspace for traders who want a disciplined
                   review loop: day-by-day P/L visibility, structured trade notes, screenshot
                   evidence, and analytics that expose what is eroding execution quality.
@@ -130,41 +130,43 @@ export default function HomePage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/register"
-                  className="rounded-full bg-[linear-gradient(135deg,#f5bc75,#e27847)] px-7 py-3 text-center text-sm font-semibold text-[#081019] transition hover:translate-y-[-1px]"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#f5bc75,#e27847)] px-7 py-3 text-center text-sm font-semibold text-[#081019] transition hover:translate-y-[-1px]"
                 >
                   Create account
                 </Link>
                 <Link
                   href="/login"
-                  className="rounded-full border border-white/10 bg-white/5 px-7 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/10 bg-white/5 px-7 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   Sign in
                 </Link>
               </div>
             </div>
 
-            <div className="relative xl:pt-6">
-              <div className="absolute inset-8 rounded-full bg-[radial-gradient(circle,rgba(243,180,103,0.26),transparent_54%)] blur-3xl" />
-              <div className="soft-panel relative overflow-hidden rounded-[2rem] p-5 shadow-[0_40px_120px_rgba(0,0,0,0.35)]">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
+            <div className="relative min-w-0 xl:pt-6">
+              <div className="absolute inset-4 rounded-full bg-[radial-gradient(circle,rgba(243,180,103,0.26),transparent_54%)] blur-3xl sm:inset-8" />
+              <div className="soft-panel relative min-w-0 overflow-hidden rounded-[1.8rem] p-4 shadow-[0_40px_120px_rgba(0,0,0,0.35)] sm:rounded-[2rem] sm:p-5">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
                     <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/46">Live preview</div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-white">Desk for post-trade review</div>
+                    <div className="mt-2 max-w-[12ch] text-[clamp(2rem,8vw,2.4rem)] font-semibold tracking-[-0.05em] leading-[0.95] text-white sm:max-w-none sm:text-2xl">
+                      Desk for post-trade review
+                    </div>
                   </div>
-                  <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
+                  <div className="inline-flex w-fit rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
                     +$2,840 week
                   </div>
                 </div>
                 <div className="grid gap-4">
-                  <div className="soft-panel rounded-[1.5rem] p-4" id="product">
-                    <div className="mb-3 flex items-center justify-between">
+                  <div className="soft-panel rounded-[1.4rem] p-3 sm:rounded-[1.5rem] sm:p-4" id="product">
+                    <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm text-white/70">March review calendar</div>
                       <div className="text-sm font-semibold text-white">{previewClosedTrades} closed trades</div>
                     </div>
                     <CalendarGrid weeks={previewCalendarWeeks} weekdayHeaders={previewWeekdayHeaders} variant="preview" />
                   </div>
                   <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-                    <div className="soft-panel rounded-[1.5rem] p-4">
+                    <div className="soft-panel rounded-[1.4rem] p-4 sm:rounded-[1.5rem]">
                       <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/46">Insight</div>
                       <div className="mt-3 text-lg font-semibold text-white" id="insights">
                         Entry quality is still the main leak.
@@ -173,8 +175,8 @@ export default function HomePage() {
                         Most losing trades this week came from early entry attempts before confirmation held.
                       </p>
                     </div>
-                    <div className="soft-panel rounded-[1.5rem] p-4">
-                      <div className="mb-3 flex items-center justify-between">
+                    <div className="soft-panel rounded-[1.4rem] p-4 sm:rounded-[1.5rem]">
+                      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/46">Distribution</div>
                         <div className="text-xs text-white/58">Trade type mix</div>
                       </div>
@@ -205,11 +207,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid h-full auto-rows-fr gap-3 sm:grid-cols-2" id="features">
+            <div className="grid min-w-0 h-full auto-rows-fr gap-3 sm:grid-cols-2" id="features">
               {featureBlocks.map((item) => (
                 <div
                   key={item.title}
-                  className="soft-panel flex h-full flex-col rounded-[1.45rem] p-5"
+                  className="soft-panel flex h-full flex-col rounded-[1.3rem] p-4 sm:rounded-[1.45rem] sm:p-5"
                 >
                   <div className="text-lg font-semibold text-white">{item.title}</div>
                   <p className="mt-2 text-sm leading-6 text-white/60">{item.copy}</p>
@@ -217,17 +219,17 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-[rgba(245,188,117,0.12)] bg-[linear-gradient(180deg,rgba(17,22,34,0.92),rgba(10,14,22,0.78))] p-5 shadow-[0_22px_64px_rgba(0,0,0,0.22)]">
+            <div className="relative min-w-0 overflow-hidden rounded-[1.8rem] border border-[rgba(245,188,117,0.12)] bg-[linear-gradient(180deg,rgba(17,22,34,0.92),rgba(10,14,22,0.78))] p-4 shadow-[0_22px_64px_rgba(0,0,0,0.22)] sm:rounded-[2rem] sm:p-5">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(245,188,117,0.45),transparent)]" />
               <div className="pointer-events-none absolute -right-14 top-10 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(241,124,71,0.16),transparent_70%)] blur-2xl" />
-              <div className="mb-4 flex items-end justify-between gap-3">
-                <div>
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
                   <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#f2c07f]/72">Review stack</div>
-                  <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-white">
+                  <div className="mt-2 max-w-[13ch] text-[clamp(1.8rem,7vw,2.4rem)] font-semibold tracking-[-0.05em] leading-[0.96] text-white sm:max-w-none sm:text-2xl">
                     Built to keep the whole process in frame.
                   </div>
                 </div>
-                <div className="hidden rounded-full border border-[rgba(245,188,117,0.18)] bg-[rgba(245,188,117,0.08)] px-3 py-1 text-xs text-[#f3c991] lg:inline-flex">
+                <div className="inline-flex w-fit rounded-full border border-[rgba(245,188,117,0.18)] bg-[rgba(245,188,117,0.08)] px-3 py-1 text-xs text-[#f3c991]">
                   One workspace
                 </div>
               </div>

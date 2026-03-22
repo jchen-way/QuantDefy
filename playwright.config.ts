@@ -13,7 +13,7 @@ export default defineConfig({
     trace: "retain-on-failure"
   },
   webServer: {
-    command: `npm run dev -- --port ${port}`,
+    command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${port}`,
     url: `http://127.0.0.1:${port}/login`,
     reuseExistingServer: false,
     timeout: 120000,
@@ -21,7 +21,11 @@ export default defineConfig({
       DATABASE_URL: "",
       UPLOAD_RUNTIME: "local",
       RUNTIME_DATA_DIR: ".e2e-runtime",
-      TRUST_PROXY_IP_HEADERS: "false"
+      TRUST_PROXY_IP_HEADERS: "false",
+      GOOGLE_CLIENT_ID: "",
+      GOOGLE_CLIENT_SECRET: "",
+      ADMIN_EMAILS: "",
+      OPENAI_API_KEY: ""
     }
   },
   projects: [

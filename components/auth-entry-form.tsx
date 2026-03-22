@@ -50,6 +50,9 @@ export function AuthEntryForm({ mode, googleEnabled = false, authError = null }:
             placeholder="Jiawei Chen"
             className={fieldClass}
             defaultValue={state.submitted?.displayName ?? ""}
+            autoComplete="name"
+            maxLength={80}
+            required
           />
         </label>
       ) : null}
@@ -61,6 +64,11 @@ export function AuthEntryForm({ mode, googleEnabled = false, authError = null }:
           placeholder="trader@example.com"
           className={fieldClass}
           defaultValue={state.submitted?.email ?? ""}
+          autoComplete="email"
+          inputMode="email"
+          spellCheck={false}
+          autoCapitalize="none"
+          required
         />
       </label>
       <label className="block space-y-2 text-sm">
@@ -70,12 +78,15 @@ export function AuthEntryForm({ mode, googleEnabled = false, authError = null }:
           type="password"
           placeholder={mode === "login" ? "Enter password" : "Choose a password"}
           className={fieldClass}
+          autoComplete={mode === "login" ? "current-password" : "new-password"}
+          minLength={8}
+          required
         />
       </label>
       {mode === "register" ? (
         <label className="block space-y-2 text-sm">
           <span className="text-white/72">Timezone</span>
-          <select name="timezone" defaultValue={submittedTimezone} className={selectFieldClass}>
+          <select name="timezone" defaultValue={submittedTimezone} className={selectFieldClass} required>
             {timezoneOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label} ({option.detail})
@@ -85,7 +96,11 @@ export function AuthEntryForm({ mode, googleEnabled = false, authError = null }:
         </label>
       ) : null}
       {errorMessage ? (
-        <div className="rounded-2xl border border-rose-400/18 bg-rose-400/8 px-4 py-3 text-sm leading-6 text-rose-100">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="rounded-2xl border border-rose-400/18 bg-rose-400/8 px-4 py-3 text-sm leading-6 text-rose-100"
+        >
           {errorMessage}
         </div>
       ) : null}

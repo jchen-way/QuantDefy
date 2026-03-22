@@ -72,5 +72,51 @@ describe("auth session helpers", () => {
     expect(deleteCookie).toHaveBeenCalledWith("quantdefy_session");
     expect(deleteCookie).toHaveBeenCalledWith("trade_logger_session");
   });
-});
 
+  it("clears stale cookies when the stored session no longer exists", async () => {
+    cookieState.set("quantdefy_session", "missing-session");
+    getSession.mockResolvedValue(null);
+    const auth = await importAuth();
+
+    const user = await auth.getCurrentUser();
+
+    expect(user).toBeNull();
+    expect(deleteCookie).toHaveBeenCalledWith("quantdefy_session");
+    expect(deleteCookie).toHaveBeenCalledWith("trade_logger_session");
+  });
+
+  it("deletes expired sessions and clears cookies", async () => {
+    cookieState.set("quantdefy_session", "expired-session");
+    getSession.mockResolvedValue({
+      id: "expired-session",
+      userId: "user_1",
+      expiresAt: "2000-01-01T00:00:00.000Z"
+    });
+    const auth = await importAuth();
+
+    const user = await auth.getCurrentUser();
+
+    expect(user).toBeNull();
+    expect(deleteSession).toHaveBeenCalledWith("expired-session");
+    expect(deleteCookie).toHaveBeenCalledWith("quantdefy_session");
+    expect(deleteCookie).toHaveBeenCalledWith("trade_logger_session");
+  });
+
+  it("deletes orphaned sessions when the user no longer exists", async () => {
+    cookieState.set("quantdefy_session", "orphaned-session");
+    getSession.mockResolvedValue({
+      id: "orphaned-session",
+      userId: "user_missing",
+      expiresAt: "2099-01-01T00:00:00.000Z"
+    });
+    getUserById.mockResolvedValue(null);
+    const auth = await importAuth();
+
+    const user = await auth.getCurrentUser();
+
+    expect(user).toBeNull();
+    expect(deleteSession).toHaveBeenCalledWith("orphaned-session");
+    expect(deleteCookie).toHaveBeenCalledWith("quantdefy_session");
+    expect(deleteCookie).toHaveBeenCalledWith("trade_logger_session");
+  });
+});
