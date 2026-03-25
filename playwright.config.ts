@@ -22,6 +22,8 @@ export default defineConfig({
       UPLOAD_RUNTIME: "local",
       RUNTIME_DATA_DIR: ".e2e-runtime",
       TRUST_PROXY_IP_HEADERS: "false",
+      UPLOAD_TOKEN_SECRET: "e2e-upload-secret",
+      UPLOAD_TOKEN_TTL_MS: "3600000",
       GOOGLE_CLIENT_ID: "",
       GOOGLE_CLIENT_SECRET: "",
       ADMIN_EMAILS: "",

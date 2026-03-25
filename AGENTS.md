@@ -4,7 +4,7 @@
 - Next.js App Router with TypeScript and Tailwind CSS v3.
 - Local demo persistence uses JSON storage in `data/runtime/store.json`.
 - Production persistence targets Neon Postgres through `@neondatabase/serverless`.
-- Local uploads are written to `data/runtime/uploads` and served through `app/api/uploads/[fileName]/route.ts`.
+- Local uploads are written to `data/runtime/uploads`, preuploaded through `app/api/uploads/route.ts`, and read back through `app/api/uploads/[fileName]/route.ts`.
 - `RUNTIME_DATA_DIR` can override the local runtime path for isolated test/dev runs.
 - Upload storage is now routed through the adapter boundary in `lib/server/uploads.ts`, with implementations under `lib/server/upload-adapters/`. `UPLOAD_RUNTIME` currently supports `local` and `s3`, so object storage no longer requires another architecture pass.
 - Vercel production should be treated as a managed ephemeral runtime: require `DATABASE_URL` for Neon-backed persistence and `UPLOAD_RUNTIME=s3` for uploads instead of relying on the local file adapters.
@@ -52,7 +52,10 @@
 - Settings mutations run through `app/settings/actions.ts`.
 - Auth mutations run through `app/auth/actions.ts`.
 - Insight regeneration is exposed through `app/insights/actions.ts`.
-- The trade form in `components/trade-form.tsx` is now a client-controlled draft form. It submits `draftJson`, `fillsJson`, `tagsJson`, and attachment metadata instead of relying on uncontrolled fields, so user input survives validation errors.
+- The trade form in `components/trade-form.tsx` is now a client-controlled draft form. It submits `draftJson`, `fillsJson`, `tagsJson`, and signed attachment claim metadata instead of relying on uncontrolled fields, so user input survives validation errors.
+- Trade images are now uploaded before the trade Server Action through `POST /api/uploads`. The route returns a signed upload claim that must be verified server-side in `app/trades/actions.ts`; do not trust client-supplied `fileName` or `storagePath` directly.
+- Attachment rows now need an explicit remove/discard path in the client form because file selection persists storage immediately. Replacing or removing a pending image should clean up the old preupload through `DELETE /api/uploads`.
+- Preuploaded images are staged server-side until a trade save consumes them. `lib/server/upload-staging.ts` opportunistically prunes expired staged uploads for both file and Neon-backed runtimes, and `UPLOAD_TOKEN_TTL_MS` controls that expiry window.
 - `Trade type` and `Setup type` are freeform text inputs with suggestion pills, not dropdowns. New labels should remain user-extensible and flow back into `customTradeTypes` / `customSetupTypes`.
 - User-facing timezone inputs are dropdowns driven from `lib/domain/catalog.ts`, not free-text fields.
 - Settings list inputs are chip/token editors in `components/token-list-field.tsx`, not comma-separated textareas.
@@ -85,6 +88,7 @@
 - Neon-backed writes for user creation and settings updates now rely on database uniqueness constraints and transactional writes instead of optimistic read-first checks alone.
 - Integration coverage is broader now: the repo includes tests for auth rate limiting, auth session cookie behavior, protected upload route behavior, local upload lifecycle, and the S3 upload adapter contract.
 - Browser coverage now exists under `e2e/` using Playwright for auth, trade creation, protected media, settings token-editor persistence, and overview month-navigation flows against an isolated local runtime.
+- The trade preupload route now has direct route-level coverage in `tests/upload-route.test.ts` for auth, empty payload rejection, signed claim issuance, and discard cleanup.
 - Fees are no longer part of the trade-entry UX. New trades default fees to zero unless older records already carry fee values.
 
 ## UI guidance
@@ -97,6 +101,6 @@
 ## Verification
 - Primary checks are `npm run build`, `npm run typecheck`, and `npm test`.
 - Browser checks are `npm run test:e2e`; Playwright uses `RUNTIME_DATA_DIR=.e2e-runtime`, `UPLOAD_RUNTIME=local`, and an isolated production-style server from `playwright.config.ts` (`npm run build && npm run start`).
-- Playwright also clears optional OAuth/OpenAI env vars in its `webServer.env` block so browser coverage does not drift based on a developer's local secrets.
+- Playwright also pins upload-claim envs and clears optional OAuth/OpenAI env vars in its `webServer.env` block so browser coverage does not drift based on a developer's local secrets.
 - `npm run typecheck` uses `tsconfig.typecheck.json` so it stays stable even when Next auto-rewrites the main `tsconfig.json` include list.
 - `npm test` excludes browser coverage. Run `npm run test:e2e` intentionally when auth/media/settings/insight UI flows are touched.

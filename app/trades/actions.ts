@@ -20,7 +20,8 @@ import {
   saveSettings,
   saveTrade
 } from "@/lib/server/store";
-import { deleteUpload, saveUpload } from "@/lib/server/uploads";
+import { consumeStagedUploads, pruneExpiredStagedUploads } from "@/lib/server/upload-staging";
+import { verifySignedUploadClaim } from "@/lib/server/uploads";
 import {
   AttachmentKind,
   FillSide,
@@ -53,7 +54,8 @@ const tagSchema = z.object({
 const attachmentRowSchema = z.object({
   id: z.string(),
   kind: z.enum(attachmentKindValues),
-  caption: z.string()
+  caption: z.string(),
+  uploadToken: z.string().optional()
 });
 
 const tradeSchema = z.object({
@@ -231,18 +233,17 @@ function sortFills(fills: TradeFill[]) {
   return [...fills].sort((left, right) => new Date(left.filledAt).getTime() - new Date(right.filledAt).getTime());
 }
 
-async function collectAttachments(formData: FormData) {
+async function collectAttachments(formData: FormData, userId: string) {
   const rows = parseJsonField(
     formData.get("attachmentRowsJson"),
     z.array(attachmentRowSchema)
   );
 
   const attachments: TradeAttachment[] = [];
-  const uploadedFileNames: string[] = [];
+  const consumedFileNames: string[] = [];
 
   for (const row of rows) {
-    const fileEntry = formData.get(`attachment-file-${row.id}`);
-    const hasFile = fileEntry instanceof File && fileEntry.size > 0;
+    const hasFile = Boolean(row.uploadToken);
     const hasCaption = row.caption.trim().length > 0;
 
     if (!hasFile && !hasCaption) {
@@ -253,12 +254,8 @@ async function collectAttachments(formData: FormData) {
       throw new Error("Every uploaded image needs both a file and a caption.");
     }
 
-    if (!(fileEntry instanceof File)) {
-      continue;
-    }
-
-    const upload = await saveUpload(fileEntry);
-    uploadedFileNames.push(upload.fileName);
+    const upload = verifySignedUploadClaim(row.uploadToken as string, userId);
+    consumedFileNames.push(upload.fileName);
     attachments.push({
       id: makeId("attachment"),
       tradeId: "",
@@ -270,7 +267,7 @@ async function collectAttachments(formData: FormData) {
     });
   }
 
-  return { attachments, uploadedFileNames };
+  return { attachments, consumedFileNames };
 }
 
 export async function saveTradeAction(
@@ -280,11 +277,10 @@ export async function saveTradeAction(
 ): Promise<TradeActionState> {
   let savedTradeId = tradeId ?? "";
   const submitted = buildSubmittedState(formData);
-  let uploadedFileNames: string[] = [];
-  let tradeCommitted = false;
 
   try {
     const user = await requireCurrentUser();
+    await pruneExpiredStagedUploads();
     const settings = await getSettings(user.id);
     const timezone = settings.timezone;
 
@@ -306,9 +302,8 @@ export async function saveTradeAction(
       category: tag.category as TagCategory,
       value: tag.value
     }));
-    const attachmentResult = await collectAttachments(formData);
+    const attachmentResult = await collectAttachments(formData, user.id);
     const newAttachments = attachmentResult.attachments;
-    uploadedFileNames = attachmentResult.uploadedFileNames;
 
     if (fills.filter((fill) => fill.side === "entry").length === 0) {
       return { error: "At least one entry fill is required.", submitted };
@@ -383,7 +378,11 @@ export async function saveTradeAction(
       });
     }
     await saveTrade(trade);
-    tradeCommitted = true;
+    try {
+      await consumeStagedUploads(attachmentResult.consumedFileNames);
+    } catch (error) {
+      console.error("Failed to consume staged uploads after trade save.", error);
+    }
     savedTradeId = nextTradeId;
     revalidatePath("/app");
     revalidatePath("/trades");
@@ -391,10 +390,6 @@ export async function saveTradeAction(
     revalidatePath("/insights");
     revalidatePath(`/trades/${nextTradeId}`);
   } catch (error) {
-    if (!tradeCommitted) {
-      await Promise.all(uploadedFileNames.map((fileName) => deleteUpload(fileName)));
-    }
-
     if (error instanceof z.ZodError) {
       return {
         error: Object.values(mapTradeZodErrors(error))[0] ?? "Please correct the trade form inputs.",

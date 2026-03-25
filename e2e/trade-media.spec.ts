@@ -52,6 +52,9 @@ test("trade create, attachment protection, and trade delete work end to end", as
 
   await page.getByPlaceholder("What does this image show?").fill("Protected upload verification");
   await page.locator('input[type="file"]').setInputFiles(imagePayload);
+  await expect(page.getByRole("button", { name: "Create trade" })).toBeDisabled();
+  await expect(page.getByText("Uploaded: chart.png")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create trade" })).toBeEnabled();
   await page.getByRole("button", { name: "Create trade" }).click();
 
   await expect(page).toHaveURL(/\/trades\/trade_/);

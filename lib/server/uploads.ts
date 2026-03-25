@@ -1,7 +1,8 @@
 import { assertSupportedUploadRuntime } from "@/lib/server/deployment-env";
+import { createUploadClaimToken, verifyUploadClaimToken } from "@/lib/server/upload-claims";
 import { localUploadAdapter } from "@/lib/server/upload-adapters/local";
 import { s3UploadAdapter } from "@/lib/server/upload-adapters/s3";
-import { UploadAdapter, UploadRuntimeMode } from "@/lib/server/upload-adapters/types";
+import { SavedUpload, UploadAdapter, UploadRuntimeMode } from "@/lib/server/upload-adapters/types";
 
 export function getUploadRuntimeMode(): UploadRuntimeMode {
   const configuredMode = process.env.UPLOAD_RUNTIME?.trim().toLowerCase();
@@ -43,4 +44,12 @@ export async function readUpload(fileName: string) {
 
 export async function deleteUpload(fileName: string) {
   return getUploadAdapter().remove(fileName);
+}
+
+export function createSignedUploadClaim(upload: SavedUpload, userId: string) {
+  return createUploadClaimToken(upload, userId);
+}
+
+export function verifySignedUploadClaim(token: string, userId: string) {
+  return verifyUploadClaimToken(token, userId);
 }
