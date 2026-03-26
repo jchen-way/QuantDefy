@@ -23,7 +23,7 @@ type TradeWithComputed = Trade & { metrics: TradeMetrics; insight?: InsightRepor
 type AnalyticsWorkspaceProps = {
   trades: TradeWithComputed[];
   semanticPageData?: SemanticInsightsPageData | null;
-  semanticModeActive?: boolean;
+  premiumReviewStatus?: "active" | "selected" | "unavailable" | "standard";
 };
 
 function aggregateLabels(items: TradeWithComputed[], getLabel: (trade: TradeWithComputed) => string) {
@@ -96,7 +96,7 @@ function buildNotableTradeCopy(
 export function AnalyticsWorkspace({
   trades,
   semanticPageData = null,
-  semanticModeActive = false
+  premiumReviewStatus = "standard"
 }: AnalyticsWorkspaceProps) {
   const [direction, setDirection] = useState("all");
   const [result, setResult] = useState("all");
@@ -249,14 +249,16 @@ export function AnalyticsWorkspace({
         <div className="mb-4">
           <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Notable trades</div>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-ink">
-            {semanticPageData ? "AI notable trades in view" : "Best and worst outcomes in view"}
+            {semanticPageData ? "Sharper trade takeaways in view" : "Best and worst outcomes in view"}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">
             {semanticPageData
-              ? "The premium snapshot is now shaping the standout trade takeaways here, so this section reads like the rest of the coaching layer instead of falling back to generic local copy."
-              : semanticModeActive
-                ? "Refresh insights to regenerate the premium semantic snapshot if you want this section to use the OpenAI-backed coaching pass."
-                : "The strongest winners and hardest losses stay visible here so you can review what deserves reinforcement versus correction."}
+              ? "Premium review brings more context into the standout trades here, so the takeaways feel sharper and more specific."
+              : premiumReviewStatus === "selected"
+                ? "Premium review is selected here. Refresh insights whenever you want a fresh pass on the standout trades in this view."
+                : premiumReviewStatus === "unavailable"
+                  ? "Premium review is unavailable right now, so this section is using the standard trade takeaways."
+                  : "The strongest winners and hardest losses stay visible here so you can review what deserves reinforcement versus correction."}
           </p>
         </div>
         <div className="grid gap-3 lg:grid-cols-2">

@@ -17,7 +17,7 @@ const featureBlocks = [
   },
   {
     title: "AI review layer",
-    copy: "Use premium semantic review to connect notes, tags, and screenshots into clearer coaching takeaways."
+    copy: "Use premium review to pull notes, tags, and chart evidence into sharper coaching takeaways."
   }
 ];
 

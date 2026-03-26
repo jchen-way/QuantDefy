@@ -86,7 +86,13 @@ export default async function InsightsPage() {
     semanticRequested && semanticAvailable ? await getLatestSemanticInsightsSnapshot(user.id) : null;
   const semanticPageData = semanticSnapshot?.payload ?? null;
   const runtimeTone = semanticPageData ? "semantic" : "local";
-  const runtimeLabel = semanticPageData ? "Semantic mode active" : "Local mode";
+  const runtimeLabel = semanticPageData
+    ? "Premium review active"
+    : semanticRequested && semanticAvailable
+      ? "Premium review selected"
+      : semanticRequested
+        ? "Premium review unavailable"
+        : "Standard review";
   const weeklyCards =
     semanticPageData?.weeklyDigests ??
     weeklyReports.slice(0, 4).map((report) => ({
@@ -138,7 +144,7 @@ export default async function InsightsPage() {
       description={
         semanticPageData
           ? semanticPageData.summary
-          : "The review layer groups similar tags, notes, and screenshot captions so recurring patterns show up even when you do not phrase them the same way every time."
+          : "Your review history, tags, and chart notes are grouped into recurring themes so the same patterns keep showing up clearly."
       }
       actions={
         <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -193,8 +199,8 @@ export default async function InsightsPage() {
       {semanticPageData ? (
         <SectionCard
           title={semanticPageData.title}
-          eyebrow="Premium mode"
-          description="Premium review reads notes, tags, and chart screenshots together to generate the current coaching page."
+          eyebrow="Premium review"
+          description="This pass pulls the strongest patterns and standout trades into one sharper coaching view."
         >
           <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
             <div className="space-y-3">
@@ -344,8 +350,8 @@ export default async function InsightsPage() {
           eyebrow="Patterns"
           description={
             semanticPageData
-              ? "AI is naming the most repeatable behaviors and telling you why they matter."
-              : "The most repeated evidence threads across the current journal, even when the wording is slightly different."
+              ? "Premium review is surfacing the habits and friction points that keep shaping results."
+              : "The patterns that repeat most often across your journal, even when the wording shifts from trade to trade."
           }
         >
           <div className="grid gap-3">
@@ -379,7 +385,7 @@ export default async function InsightsPage() {
           eyebrow="Per trade"
           description={
             semanticPageData
-              ? "A compact set of premium trade reviews. Open the trade itself for the full journal record."
+              ? "A tighter read on the standout trades in your journal. Open the trade itself for the full record."
               : "A short list of the most recent trade reviews. Open the trade itself for the full journal record."
           }
         >

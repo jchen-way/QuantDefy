@@ -110,23 +110,23 @@ export function SettingsForm({ settings, semanticInsightsAvailable = false }: Se
             />
             <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-ink">
               <input type="checkbox" name="aiInsightsEnabled" defaultChecked={currentValues.aiInsightsEnabled} />
-              Enable hybrid AI insight summaries
+              Enable AI review summaries
             </label>
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-ink">Insight mode</span>
+              <span className="font-medium text-ink">Review mode</span>
               <select
                 key={currentValues.insightMode}
                 name="insightMode"
                 defaultValue={currentValues.insightMode}
                 className={selectFieldClass}
               >
-                <option value="local">Local pattern engine</option>
-                <option value="semantic">Semantic retrieval (premium)</option>
+                <option value="local">Standard review</option>
+                <option value="semantic">Premium review</option>
               </select>
               <p className="text-sm leading-6 text-muted">
                 {semanticInsightsAvailable
-                  ? "Premium semantic retrieval is available and can use embedding-backed similarity across notes, tags, and image captions."
-                  : "Semantic retrieval needs an API key at runtime. Without one, the app falls back to the local pattern engine."}
+                  ? "Premium review brings more context into your notes, tags, and chart evidence so the takeaways feel more tailored."
+                  : "Premium review is unavailable right now, so insights will stay on the standard review mode."}
               </p>
             </label>
           </div>

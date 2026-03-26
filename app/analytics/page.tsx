@@ -34,6 +34,13 @@ export default async function AnalyticsPage() {
   const semanticSnapshot =
     semanticRequested && semanticAvailable ? await getLatestSemanticInsightsSnapshot(user.id) : null;
   const semanticPageData = semanticSnapshot?.payload ?? null;
+  const premiumReviewStatus = semanticPageData
+    ? "active"
+    : semanticRequested && semanticAvailable
+      ? "selected"
+      : semanticRequested
+        ? "unavailable"
+        : "standard";
 
   return (
     <WorkspaceShell
@@ -44,7 +51,7 @@ export default async function AnalyticsPage() {
       <AnalyticsWorkspace
         trades={snapshot.trades}
         semanticPageData={semanticPageData}
-        semanticModeActive={semanticRequested}
+        premiumReviewStatus={premiumReviewStatus}
       />
     </WorkspaceShell>
   );

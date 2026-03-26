@@ -8,7 +8,7 @@ QuantDefy is a private post-trade review workspace for traders. It combines a ca
 - Log trades with thesis, execution notes, tags, and fills
 - Attach setup and post-trade screenshots to journal entries
 - Analyze recurring mistakes, setups, sizing, and outcomes
-- Generate local insight summaries by default, with optional premium semantic refreshes
+- Generate standard review summaries by default, with optional premium review refreshes
 - Support private multi-user hosting with server-side auth, quotas, and admin controls
 
 ## Stack
@@ -20,7 +20,7 @@ QuantDefy is a private post-trade review workspace for traders. It combines a ca
 - Neon Postgres for production persistence
 - Local JSON/file runtime for local demo mode
 - S3-compatible object storage for hosted uploads
-- OpenAI API for optional semantic insight refreshes
+- OpenAI API for optional premium review refreshes
 
 ## Routes
 
@@ -130,4 +130,4 @@ Google OAuth is optional. Admin access is controlled by your app through `ADMIN_
 
 ## Status
 
-The app supports local demo mode for development and a production-ready hosted path with Neon, S3, Google OAuth, semantic insight quotas, and an admin-only usage surface.
+The app supports local demo mode for development and a production-ready hosted path with Neon, S3, Google OAuth, premium review quotas, and an admin-only usage surface.
