@@ -8,10 +8,8 @@ const saveUpload = vi.fn();
 const deleteUpload = vi.fn();
 const createSignedUploadClaim = vi.fn();
 const verifySignedUploadClaim = vi.fn();
-const pruneExpiredStagedUploads = vi.fn();
-const registerStagedUpload = vi.fn();
-const discardStagedUpload = vi.fn();
-const getUploadClaimLifetimeMs = vi.fn();
+const createPreuploadedImage = vi.fn();
+const discardPreuploadedImage = vi.fn();
 
 vi.mock("../lib/server/auth", () => ({
   getCurrentUser
@@ -29,14 +27,9 @@ vi.mock("../lib/server/uploads", () => ({
   verifySignedUploadClaim
 }));
 
-vi.mock("../lib/server/upload-staging", () => ({
-  pruneExpiredStagedUploads,
-  registerStagedUpload,
-  discardStagedUpload
-}));
-
-vi.mock("../lib/server/upload-config", () => ({
-  getUploadClaimLifetimeMs
+vi.mock("../lib/server/upload-workflow", () => ({
+  createPreuploadedImage,
+  discardPreuploadedImage
 }));
 
 async function importRoute() {
@@ -58,10 +51,8 @@ describe("protected upload route", () => {
     deleteUpload.mockReset();
     createSignedUploadClaim.mockReset();
     verifySignedUploadClaim.mockReset();
-    pruneExpiredStagedUploads.mockReset();
-    registerStagedUpload.mockReset();
-    discardStagedUpload.mockReset();
-    getUploadClaimLifetimeMs.mockReset();
+    createPreuploadedImage.mockReset();
+    discardPreuploadedImage.mockReset();
   });
 
   it("returns 401 when no user session is present", async () => {
@@ -111,11 +102,8 @@ describe("upload mutation route", () => {
     deleteUpload.mockReset();
     createSignedUploadClaim.mockReset();
     verifySignedUploadClaim.mockReset();
-    pruneExpiredStagedUploads.mockReset();
-    registerStagedUpload.mockReset();
-    discardStagedUpload.mockReset();
-    getUploadClaimLifetimeMs.mockReset();
-    getUploadClaimLifetimeMs.mockReturnValue(3600000);
+    createPreuploadedImage.mockReset();
+    discardPreuploadedImage.mockReset();
   });
 
   it("returns 401 when preuploading without a session", async () => {
@@ -145,12 +133,11 @@ describe("upload mutation route", () => {
 
   it("returns a signed upload claim for valid preuploads", async () => {
     getCurrentUser.mockResolvedValue({ id: "user_1" });
-    saveUpload.mockResolvedValue({
+    createPreuploadedImage.mockResolvedValue({
       fileName: "upload_1.png",
-      storagePath: "/api/uploads/upload_1.png"
+      storagePath: "/api/uploads/upload_1.png",
+      uploadToken: "signed-upload-claim"
     });
-    createSignedUploadClaim.mockReturnValue("signed-upload-claim");
-    registerStagedUpload.mockResolvedValue(undefined);
 
     const { POST } = await importUploadMutationRoute();
     const formData = new FormData();
@@ -167,25 +154,12 @@ describe("upload mutation route", () => {
       storagePath: "/api/uploads/upload_1.png",
       uploadToken: "signed-upload-claim"
     });
-    expect(createSignedUploadClaim).toHaveBeenCalledWith(
-      { fileName: "upload_1.png", storagePath: "/api/uploads/upload_1.png" },
-      "user_1"
-    );
-    expect(registerStagedUpload).toHaveBeenCalledWith(
-      "user_1",
-      "upload_1.png",
-      "/api/uploads/upload_1.png",
-      expect.any(String)
-    );
+    expect(createPreuploadedImage).toHaveBeenCalled();
   });
 
   it("deletes a claimed upload for the current user", async () => {
     getCurrentUser.mockResolvedValue({ id: "user_1" });
-    verifySignedUploadClaim.mockReturnValue({
-      fileName: "upload_1.png",
-      storagePath: "/api/uploads/upload_1.png"
-    });
-    discardStagedUpload.mockResolvedValue(undefined);
+    discardPreuploadedImage.mockResolvedValue(undefined);
 
     const { DELETE } = await importUploadMutationRoute();
     const request = new NextRequest("http://localhost/api/uploads", {
@@ -199,14 +173,12 @@ describe("upload mutation route", () => {
     const response = await DELETE(request);
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ success: true });
-    expect(verifySignedUploadClaim).toHaveBeenCalledWith("signed-upload-claim", "user_1");
-    expect(deleteUpload).toHaveBeenCalledWith("upload_1.png");
-    expect(discardStagedUpload).toHaveBeenCalledWith("upload_1.png");
+    expect(discardPreuploadedImage).toHaveBeenCalledWith("user_1", "signed-upload-claim");
   });
 
   it("returns validation errors when saveUpload rejects", async () => {
     getCurrentUser.mockResolvedValue({ id: "user_1" });
-    saveUpload.mockRejectedValue(new Error("Uploads must be PNG, JPG, WebP, or GIF images."));
+    createPreuploadedImage.mockRejectedValue(new Error("Uploads must be PNG, JPG, WebP, or GIF images."));
 
     const { POST } = await importUploadMutationRoute();
     const formData = new FormData();
@@ -225,7 +197,7 @@ describe("upload mutation route", () => {
 
   it("returns 400 for invalid upload claims on delete", async () => {
     getCurrentUser.mockResolvedValue({ id: "user_1" });
-    verifySignedUploadClaim.mockImplementation(() => {
+    discardPreuploadedImage.mockImplementation(() => {
       throw new Error("Invalid upload reference.");
     });
 

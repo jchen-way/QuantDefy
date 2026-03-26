@@ -14,6 +14,7 @@ import {
 import { AttachmentKind, TagCategory, Trade, TradeFill } from "@/lib/domain/types";
 import { deriveCapitalAllocatedFromFills, toCurrency, toInputDateTimeInTimeZone } from "@/lib/domain/utils";
 import { FormSubmit } from "@/components/form-submit";
+import { useTradeAttachmentsDraft } from "@/components/use-trade-attachments-draft";
 import { fieldClass, selectFieldClass, textareaFieldClass } from "@/lib/ui/form-styles";
 
 type FillDraft = {
@@ -29,17 +30,6 @@ type TagDraft = {
   id: string;
   category: TagCategory;
   value: string;
-};
-
-type AttachmentDraft = {
-  id: string;
-  kind: AttachmentKind;
-  caption: string;
-  uploadToken?: string;
-  fileName?: string;
-  originalFileName?: string;
-  uploading?: boolean;
-  uploadError?: string | null;
 };
 
 type TradeDraft = {
@@ -144,20 +134,6 @@ function parseDraftState<T>(value: string | null, fallback: T): T {
   }
 }
 
-type UploadAttachmentResult = {
-  fileName: string;
-  uploadToken: string;
-};
-
-function createBlankAttachment(id: string): AttachmentDraft {
-  return {
-    id,
-    kind: "setup",
-    caption: "",
-    uploadError: null
-  };
-}
-
 export function TradeForm({
   trade,
   defaultRisk,
@@ -182,15 +158,17 @@ export function TradeForm({
       value: tag.value
     })) ?? [{ id: "tag_new_1", category: "setup", value: "" }]
   );
-  const [attachments, setAttachments] = useState<AttachmentDraft[]>([
-    createBlankAttachment("attachment_new_1")
-  ]);
-  const attachmentsRef = useRef(attachments);
-  const removedAttachmentIdsRef = useRef(new Set<string>());
-
-  useEffect(() => {
-    attachmentsRef.current = attachments;
-  }, [attachments]);
+  const {
+    attachments,
+    pendingAttachmentUploads,
+    rehydrate: rehydrateAttachments,
+    updateKind: updateAttachmentKind,
+    updateCaption: updateAttachmentCaption,
+    uploadAttachmentFile,
+    removeAttachmentRow,
+    addAttachmentRow,
+    serializeForSubmit
+  } = useTradeAttachmentsDraft({ makeRowId });
 
   useEffect(() => {
     if (!state.submitted) {
@@ -200,20 +178,7 @@ export function TradeForm({
     setDraft((current) => parseDraftState<TradeDraft>(state.submitted?.draftJson ?? null, current));
     setFills((current) => parseDraftState<FillDraft[]>(state.submitted?.fillsJson ?? null, current));
     setTags((current) => parseDraftState<TagDraft[]>(state.submitted?.tagsJson ?? null, current));
-    setAttachments((current) => {
-      const next = parseDraftState<AttachmentDraft[]>(state.submitted?.attachmentRowsJson ?? null, current);
-      return next.map((attachment) => {
-        const existing = current.find((item) => item.id === attachment.id);
-        return existing
-          ? {
-              ...existing,
-              kind: attachment.kind,
-              caption: attachment.caption,
-              uploadToken: attachment.uploadToken
-            }
-          : attachment;
-      });
-    });
+    rehydrateAttachments(state.submitted?.attachmentRowsJson ?? null);
   }, [state.submitted]);
 
   const tradeTypeSuggestions = useMemo(
@@ -257,107 +222,6 @@ export function TradeForm({
   }
 
   const fieldErrors = state.fieldErrors ?? {};
-  const pendingAttachmentUploads = attachments.some((attachment) => attachment.uploading);
-
-  async function discardUploadedImage(uploadToken: string) {
-    await fetch("/api/uploads", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ uploadToken })
-    });
-  }
-
-  async function uploadAttachmentFile(attachmentId: string, file: File) {
-    const previousAttachment = attachmentsRef.current.find((item) => item.id === attachmentId);
-    const previousUploadToken = previousAttachment?.uploadToken;
-
-    setAttachments((current) =>
-      current.map((item) =>
-        item.id === attachmentId
-          ? {
-              ...item,
-              uploading: true,
-              uploadError: null
-            }
-          : item
-      )
-    );
-
-    const body = new FormData();
-    body.append("file", file);
-
-    try {
-      const response = await fetch("/api/uploads", {
-        method: "POST",
-        body
-      });
-
-      const payload = (await response.json()) as UploadAttachmentResult | { error?: string };
-      const uploadError =
-        typeof payload === "object" && payload !== null && "error" in payload ? payload.error : undefined;
-
-      if (!response.ok || !("fileName" in payload) || !("uploadToken" in payload)) {
-        throw new Error(uploadError ?? "Upload failed.");
-      }
-
-      if (removedAttachmentIdsRef.current.has(attachmentId)) {
-        removedAttachmentIdsRef.current.delete(attachmentId);
-        void discardUploadedImage(payload.uploadToken);
-        return;
-      }
-
-      setAttachments((current) =>
-        current.map((item) =>
-          item.id === attachmentId
-            ? {
-                ...item,
-                uploadToken: payload.uploadToken,
-                fileName: payload.fileName,
-                originalFileName: file.name,
-                uploading: false,
-                uploadError: null
-              }
-            : item
-        )
-      );
-
-      if (previousUploadToken && previousUploadToken !== payload.uploadToken) {
-        void discardUploadedImage(previousUploadToken);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Upload failed.";
-      setAttachments((current) =>
-        current.map((item) =>
-          item.id === attachmentId
-            ? {
-                ...item,
-                uploadToken: previousAttachment?.uploadToken,
-                fileName: previousAttachment?.fileName,
-                originalFileName: previousAttachment?.originalFileName,
-                uploading: false,
-                uploadError: message
-              }
-            : item
-        )
-      );
-    }
-  }
-
-  async function removeAttachmentRow(attachmentId: string) {
-    const target = attachmentsRef.current.find((item) => item.id === attachmentId);
-    removedAttachmentIdsRef.current.add(attachmentId);
-
-    if (target?.uploadToken) {
-      void discardUploadedImage(target.uploadToken);
-    }
-
-    setAttachments((current) => {
-      const next = current.filter((item) => item.id !== attachmentId);
-      return next.length > 0 ? next : [createBlankAttachment(makeRowId("attachment"))];
-    });
-  }
 
   return (
     <form
@@ -379,14 +243,7 @@ export function TradeForm({
       <input
         type="hidden"
         name="attachmentRowsJson"
-        value={JSON.stringify(
-          attachments.map(({ id, kind, caption, uploadToken }) => ({
-            id,
-            kind,
-            caption,
-            uploadToken
-          }))
-        )}
+        value={serializeForSubmit()}
       />
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -811,17 +668,9 @@ export function TradeForm({
                   <div className="grid gap-3 sm:grid-cols-[0.7fr_1.3fr]">
                     <select
                       value={attachment.kind}
-                      onChange={(event) =>
-                        setAttachments((current) =>
-                          current.map((item) =>
-                            item.id === attachment.id
-                              ? { ...item, kind: event.target.value as AttachmentKind }
-                              : item
-                          )
-                        )
-                    }
-                    className={selectFieldClass}
-                  >
+                      onChange={(event) => updateAttachmentKind(attachment.id, event.target.value as AttachmentKind)}
+                      className={selectFieldClass}
+                    >
                       {attachmentKindOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
@@ -830,13 +679,7 @@ export function TradeForm({
                     </select>
                     <input
                       value={attachment.caption}
-                      onChange={(event) =>
-                        setAttachments((current) =>
-                          current.map((item) =>
-                            item.id === attachment.id ? { ...item, caption: event.target.value } : item
-                          )
-                        )
-                      }
+                      onChange={(event) => updateAttachmentCaption(attachment.id, event.target.value)}
                       className={fieldClass}
                       placeholder="What does this image show?"
                     />
@@ -865,12 +708,7 @@ export function TradeForm({
               ))}
               <button
                 type="button"
-                onClick={() =>
-                  setAttachments((current) => [
-                    ...current,
-                    createBlankAttachment(makeRowId("attachment"))
-                  ])
-                }
+                onClick={addAttachmentRow}
                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-ink"
               >
                 Add image

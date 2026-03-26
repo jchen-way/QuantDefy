@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pruneExpiredStagedUploads } from "@/lib/server/upload-staging";
+import { runExpiredUploadCleanup } from "@/lib/server/upload-workflow";
 
 const cleanupRouteHeaders = {
   "Cache-Control": "private, no-store, max-age=0, must-revalidate",
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: cleanupRouteHeaders });
     }
 
-    const prunedCount = await pruneExpiredStagedUploads();
+    const prunedCount = await runExpiredUploadCleanup();
     return NextResponse.json(
       {
         success: true,

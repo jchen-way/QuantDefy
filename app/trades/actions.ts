@@ -20,8 +20,7 @@ import {
   saveSettings,
   saveTrade
 } from "@/lib/server/store";
-import { consumeStagedUploads, pruneExpiredStagedUploads } from "@/lib/server/upload-staging";
-import { verifySignedUploadClaim } from "@/lib/server/uploads";
+import { buildTradeAttachmentsFromClaims, finalizeConsumedTradeUploads } from "@/lib/server/upload-workflow";
 import {
   AttachmentKind,
   FillSide,
@@ -238,36 +237,14 @@ async function collectAttachments(formData: FormData, userId: string) {
     formData.get("attachmentRowsJson"),
     z.array(attachmentRowSchema)
   );
-
-  const attachments: TradeAttachment[] = [];
-  const consumedFileNames: string[] = [];
-
-  for (const row of rows) {
-    const hasFile = Boolean(row.uploadToken);
-    const hasCaption = row.caption.trim().length > 0;
-
-    if (!hasFile && !hasCaption) {
-      continue;
-    }
-
-    if (hasFile !== hasCaption) {
-      throw new Error("Every uploaded image needs both a file and a caption.");
-    }
-
-    const upload = verifySignedUploadClaim(row.uploadToken as string, userId);
-    consumedFileNames.push(upload.fileName);
-    attachments.push({
-      id: makeId("attachment"),
-      tradeId: "",
+  return buildTradeAttachmentsFromClaims(
+    rows.map((row) => ({
       kind: row.kind as AttachmentKind,
-      storagePath: upload.storagePath,
       caption: row.caption,
-      uploadedAt: new Date().toISOString(),
-      fileName: upload.fileName
-    });
-  }
-
-  return { attachments, consumedFileNames };
+      uploadToken: row.uploadToken
+    })),
+    userId
+  );
 }
 
 export async function saveTradeAction(
@@ -280,7 +257,6 @@ export async function saveTradeAction(
 
   try {
     const user = await requireCurrentUser();
-    await pruneExpiredStagedUploads();
     const settings = await getSettings(user.id);
     const timezone = settings.timezone;
 
@@ -379,7 +355,7 @@ export async function saveTradeAction(
     }
     await saveTrade(trade);
     try {
-      await consumeStagedUploads(attachmentResult.consumedFileNames);
+      await finalizeConsumedTradeUploads(attachmentResult.consumedFileNames);
     } catch (error) {
       console.error("Failed to consume staged uploads after trade save.", error);
     }

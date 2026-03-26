@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/server/auth";
-import { getUploadClaimLifetimeMs } from "@/lib/server/upload-config";
-import {
-  discardStagedUpload,
-  pruneExpiredStagedUploads,
-  registerStagedUpload
-} from "@/lib/server/upload-staging";
-import { createSignedUploadClaim, deleteUpload, saveUpload, verifySignedUploadClaim } from "@/lib/server/uploads";
+import { createPreuploadedImage, discardPreuploadedImage } from "@/lib/server/upload-workflow";
 
 const uploadRouteHeaders = {
   "Cache-Control": "private, no-store, max-age=0, must-revalidate",
@@ -29,24 +23,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await pruneExpiredStagedUploads();
-    const upload = await saveUpload(fileEntry);
-    const uploadToken = createSignedUploadClaim(upload, user.id);
-    await registerStagedUpload(
-      user.id,
-      upload.fileName,
-      upload.storagePath,
-      new Date(Date.now() + getUploadClaimLifetimeMs()).toISOString()
-    );
-
-    return NextResponse.json(
-      {
-        fileName: upload.fileName,
-        storagePath: upload.storagePath,
-        uploadToken
-      },
-      { headers: uploadRouteHeaders }
-    );
+    const upload = await createPreuploadedImage(user.id, fileEntry);
+    return NextResponse.json(upload, { headers: uploadRouteHeaders });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to upload this image.";
     const status = message.startsWith("Uploads must") ? 400 : 500;
@@ -62,15 +40,12 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    await pruneExpiredStagedUploads();
     const body = (await request.json()) as { uploadToken?: string };
     if (typeof body.uploadToken !== "string" || body.uploadToken.trim().length === 0) {
       return NextResponse.json({ error: "Upload reference is required." }, { status: 400, headers: uploadRouteHeaders });
     }
 
-    const upload = verifySignedUploadClaim(body.uploadToken, user.id);
-    await deleteUpload(upload.fileName);
-    await discardStagedUpload(upload.fileName);
+    await discardPreuploadedImage(user.id, body.uploadToken);
 
     return NextResponse.json({ success: true }, { headers: uploadRouteHeaders });
   } catch (error) {

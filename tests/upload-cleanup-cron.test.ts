@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const pruneExpiredStagedUploads = vi.fn();
+const runExpiredUploadCleanup = vi.fn();
 
-vi.mock("../lib/server/upload-staging", () => ({
-  pruneExpiredStagedUploads
+vi.mock("../lib/server/upload-workflow", () => ({
+  runExpiredUploadCleanup
 }));
 
 async function importRoute() {
@@ -16,7 +16,7 @@ describe("upload cleanup cron route", () => {
   const originalCronSecret = process.env.CRON_SECRET;
 
   beforeEach((context) => {
-    pruneExpiredStagedUploads.mockReset();
+    runExpiredUploadCleanup.mockReset();
     process.env.CRON_SECRET = "cron-secret";
     context.onTestFinished(() => {
       process.env.CRON_SECRET = originalCronSecret;
@@ -32,7 +32,7 @@ describe("upload cleanup cron route", () => {
   });
 
   it("returns the number of pruned uploads for authorized requests", async () => {
-    pruneExpiredStagedUploads.mockResolvedValue(3);
+    runExpiredUploadCleanup.mockResolvedValue(3);
     const { GET } = await importRoute();
     const response = await GET(
       new NextRequest("http://localhost/api/cron/cleanup-uploads", {
@@ -46,6 +46,23 @@ describe("upload cleanup cron route", () => {
     await expect(response.json()).resolves.toEqual({
       success: true,
       prunedCount: 3
+    });
+  });
+
+  it("returns 500 when CRON_SECRET is not configured", async () => {
+    process.env.CRON_SECRET = "";
+    const { GET } = await importRoute();
+    const response = await GET(
+      new NextRequest("http://localhost/api/cron/cleanup-uploads", {
+        headers: {
+          authorization: "Bearer cron-secret"
+        }
+      })
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "CRON_SECRET must be configured for cleanup cron access."
     });
   });
 });

@@ -54,9 +54,10 @@
 - Insight regeneration is exposed through `app/insights/actions.ts`.
 - The trade form in `components/trade-form.tsx` is now a client-controlled draft form. It submits `draftJson`, `fillsJson`, `tagsJson`, and signed attachment claim metadata instead of relying on uncontrolled fields, so user input survives validation errors.
 - Trade images are now uploaded before the trade Server Action through `POST /api/uploads`. The route returns a signed upload claim that must be verified server-side in `app/trades/actions.ts`; do not trust client-supplied `fileName` or `storagePath` directly.
+- Upload lifecycle orchestration now lives in `lib/server/upload-workflow.ts`. Prefer extending that service for preupload, discard, trade-attachment consumption, and cleanup behavior instead of duplicating sequencing in routes/actions.
 - Attachment rows now need an explicit remove/discard path in the client form because file selection persists storage immediately. Replacing or removing a pending image should clean up the old preupload through `DELETE /api/uploads`.
 - Preuploaded images are staged server-side until a trade save consumes them. `lib/server/upload-staging.ts` opportunistically prunes expired staged uploads for both file and Neon-backed runtimes, and `UPLOAD_TOKEN_TTL_MS` controls that expiry window.
-- Vercel now has an hourly cron in `vercel.json` hitting `/api/cron/cleanup-uploads`; it requires `CRON_SECRET` and prunes expired staged uploads even when no user traffic occurs.
+- Vercel Hobby now has a daily cron in `vercel.json` hitting `/api/cron/cleanup-uploads`; it requires `CRON_SECRET` and prunes expired staged uploads even when no user traffic occurs. Shorter TTLs still rely mostly on opportunistic cleanup between daily runs.
 - `Trade type` and `Setup type` are freeform text inputs with suggestion pills, not dropdowns. New labels should remain user-extensible and flow back into `customTradeTypes` / `customSetupTypes`.
 - User-facing timezone inputs are dropdowns driven from `lib/domain/catalog.ts`, not free-text fields.
 - Settings list inputs are chip/token editors in `components/token-list-field.tsx`, not comma-separated textareas.
@@ -98,10 +99,11 @@
 - Avoid reintroducing stacked decorative callout cards in the workspace shell unless they convey real workflow value.
 - Equity curve cards should still communicate state when there is only one closed trade; the shared chart component already renders a single-point marker for that case.
 - Trade/analytics cards are moving toward flatter editorial layouts: fewer nested boxes, fewer redundant CTA blocks, and context-aware copy instead of generic coaching placeholders.
+- The trade form’s attachment draft lifecycle is now factored into `components/use-trade-attachments-draft.ts`; keep attachment-specific state transitions there instead of re-expanding `components/trade-form.tsx`.
 
 ## Verification
 - Primary checks are `npm run build`, `npm run typecheck`, and `npm test`.
-- Browser checks are `npm run test:e2e`; Playwright uses `RUNTIME_DATA_DIR=.e2e-runtime`, `UPLOAD_RUNTIME=local`, and an isolated production-style server from `playwright.config.ts` (`npm run build && npm run start`).
+- Browser checks are `npm run test:e2e`; the script prebuilds once, then Playwright starts an isolated production-style server from `playwright.config.ts` with `RUNTIME_DATA_DIR=.e2e-runtime` and `UPLOAD_RUNTIME=local`.
 - Playwright also pins upload-claim envs and clears optional OAuth/OpenAI env vars in its `webServer.env` block so browser coverage does not drift based on a developer's local secrets.
 - `npm run typecheck` uses `tsconfig.typecheck.json` so it stays stable even when Next auto-rewrites the main `tsconfig.json` include list.
 - `npm test` excludes browser coverage. Run `npm run test:e2e` intentionally when auth/media/settings/insight UI flows are touched.
