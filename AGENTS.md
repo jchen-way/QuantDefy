@@ -11,7 +11,7 @@
 - Validation is handled with `zod`.
 
 ## Product surfaces
-- Public routes: `/`, `/login`, `/register`, `/auth/google`, `/auth/google/callback`.
+- Public routes: `/`, `/login`, `/register`, `/auth/google`, `/auth/google/callback`, `/api/cron/cleanup-uploads` (cron-secret protected).
 - App routes: `/app`, `/trades`, `/trades/new`, `/trades/[tradeId]`, `/analytics`, `/insights`, `/settings`, `/admin` (admin-only).
 - Shared shells live in `components/public-navbar.tsx`, `components/auth-shell.tsx`, and `components/workspace-shell.tsx`.
 - New Neon-backed accounts start empty; the dashboard, journal, analytics, and insights pages now include first-trade onboarding states instead of relying on seeded demo data.
@@ -56,6 +56,7 @@
 - Trade images are now uploaded before the trade Server Action through `POST /api/uploads`. The route returns a signed upload claim that must be verified server-side in `app/trades/actions.ts`; do not trust client-supplied `fileName` or `storagePath` directly.
 - Attachment rows now need an explicit remove/discard path in the client form because file selection persists storage immediately. Replacing or removing a pending image should clean up the old preupload through `DELETE /api/uploads`.
 - Preuploaded images are staged server-side until a trade save consumes them. `lib/server/upload-staging.ts` opportunistically prunes expired staged uploads for both file and Neon-backed runtimes, and `UPLOAD_TOKEN_TTL_MS` controls that expiry window.
+- Vercel now has an hourly cron in `vercel.json` hitting `/api/cron/cleanup-uploads`; it requires `CRON_SECRET` and prunes expired staged uploads even when no user traffic occurs.
 - `Trade type` and `Setup type` are freeform text inputs with suggestion pills, not dropdowns. New labels should remain user-extensible and flow back into `customTradeTypes` / `customSetupTypes`.
 - User-facing timezone inputs are dropdowns driven from `lib/domain/catalog.ts`, not free-text fields.
 - Settings list inputs are chip/token editors in `components/token-list-field.tsx`, not comma-separated textareas.

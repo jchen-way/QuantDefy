@@ -94,16 +94,18 @@ export async function pruneExpiredStagedUploads(now = Date.now()) {
       await sql.query("DELETE FROM staged_uploads WHERE expires_at <= $1", [cutoff]);
     }
 
-    return;
+    return expired.length;
   }
 
-  await withFileStagingLock(async () => {
+  return withFileStagingLock(async () => {
     const entries = await readFileEntries();
     const nextEntries: StagedUploadEntry[] = [];
+    let prunedCount = 0;
 
     for (const entry of entries) {
       if (Date.parse(entry.expiresAt) <= now) {
         await deleteUpload(entry.fileName);
+        prunedCount += 1;
         continue;
       }
 
@@ -111,6 +113,7 @@ export async function pruneExpiredStagedUploads(now = Date.now()) {
     }
 
     await writeFileEntries(nextEntries);
+    return prunedCount;
   });
 }
 
