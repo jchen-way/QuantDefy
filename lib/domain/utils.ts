@@ -111,11 +111,24 @@ export function deriveCapitalAllocatedFromFills(
 ) {
   const multiplier = getTradeContractMultiplier(assetClass);
   let runningQuantity = 0;
+  let runningCostBasis = 0;
   let maxCapitalUsed = 0;
 
   for (const fill of fills) {
-    runningQuantity += fill.side === "entry" ? fill.quantity : -fill.quantity;
-    maxCapitalUsed = Math.max(maxCapitalUsed, Math.abs(runningQuantity * fill.price * multiplier));
+    const quantity = Math.max(fill.quantity, 0);
+    const fillNotional = quantity * fill.price * multiplier;
+
+    if (fill.side === "entry") {
+      runningQuantity += quantity;
+      runningCostBasis += fillNotional;
+    } else {
+      const averageUnitCost = runningQuantity > 0 ? runningCostBasis / runningQuantity : fill.price * multiplier;
+      const closedQuantity = Math.min(quantity, runningQuantity);
+      runningQuantity = Math.max(runningQuantity - quantity, 0);
+      runningCostBasis = Math.max(runningCostBasis - averageUnitCost * closedQuantity, 0);
+    }
+
+    maxCapitalUsed = Math.max(maxCapitalUsed, runningCostBasis);
   }
 
   return round(maxCapitalUsed, 2);

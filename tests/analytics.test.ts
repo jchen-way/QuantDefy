@@ -412,7 +412,19 @@ describe("computeTradeMetrics", () => {
         ],
         "option"
       )
-    ).toBe(2276);
+    ).toBe(2270);
+  });
+
+  it("increases capital allocation when adds raise cumulative cost basis at a lower price", () => {
+    expect(
+      deriveCapitalAllocatedFromFills(
+        [
+          { side: "entry", quantity: 2, price: 3.39 },
+          { side: "entry", quantity: 4, price: 0.84 }
+        ],
+        "option"
+      )
+    ).toBe(1014);
   });
 });
 
