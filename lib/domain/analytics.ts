@@ -212,7 +212,12 @@ function buildCalendarDays(
 
   const days: CalendarDay[] = [];
   let cursor = new Date(start);
-  let running = 0;
+  let running = round(
+    Array.from(realizedByDay.entries())
+      .filter(([isoDate]) => isoDate < start.toISOString().slice(0, 10))
+      .reduce((total, [, value]) => total + value.total, 0),
+    2
+  );
 
   while (cursor <= end) {
     const isoDate = cursor.toISOString().slice(0, 10);

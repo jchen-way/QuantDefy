@@ -309,6 +309,70 @@ describe("computeTradeMetrics", () => {
     expect(dashboard.calendarDays.some((day) => day.isoDate === "2026-04-01" && day.inMonth)).toBe(true);
   });
 
+  it("carries cumulative P/L across month boundaries in the calendar view", () => {
+    const marchWin = makeTrade({
+      id: "march_win",
+      openedAt: "2026-03-30T09:30:00-04:00",
+      closedAt: "2026-03-30T10:00:00-04:00",
+      fills: [
+        {
+          id: "march_win_entry",
+          tradeId: "march_win",
+          side: "entry",
+          filledAt: "2026-03-30T09:30:00-04:00",
+          quantity: 10,
+          price: 100
+        },
+        {
+          id: "march_win_exit",
+          tradeId: "march_win",
+          side: "exit",
+          filledAt: "2026-03-30T10:00:00-04:00",
+          quantity: 10,
+          price: 110
+        }
+      ]
+    });
+    const aprilLoss = makeTrade({
+      id: "april_loss",
+      openedAt: "2026-04-01T09:30:00-04:00",
+      closedAt: "2026-04-01T10:00:00-04:00",
+      fills: [
+        {
+          id: "april_loss_entry",
+          tradeId: "april_loss",
+          side: "entry",
+          filledAt: "2026-04-01T09:30:00-04:00",
+          quantity: 10,
+          price: 100
+        },
+        {
+          id: "april_loss_exit",
+          tradeId: "april_loss",
+          side: "exit",
+          filledAt: "2026-04-01T10:00:00-04:00",
+          quantity: 10,
+          price: 95
+        }
+      ]
+    });
+
+    const dashboard = buildDashboardData(
+      [marchWin, aprilLoss],
+      [],
+      "America/New_York",
+      undefined,
+      "2026-04",
+      new Date("2026-04-02T12:00:00-04:00")
+    );
+
+    expect(dashboard.calendarDays.find((day) => day.isoDate === "2026-03-30")?.cumulativePl).toBe(100);
+    expect(dashboard.calendarDays.find((day) => day.isoDate === "2026-03-31")?.cumulativePl).toBe(100);
+    expect(dashboard.calendarDays.find((day) => day.isoDate === "2026-04-01")?.cumulativePl).toBe(50);
+    expect(dashboard.calendarDays.find((day) => day.isoDate === "2026-04-04")?.cumulativePl).toBe(50);
+    expect(dashboard.calendarDays.find((day) => day.isoDate === "2026-04-11")?.cumulativePl).toBe(50);
+  });
+
   it("uses the latest closed week rather than the latest opened trade when building dashboard coaching", () => {
     const olderOpenLaterClose = makeTrade({
       id: "swing_trade",

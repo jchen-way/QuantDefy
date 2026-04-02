@@ -30,6 +30,7 @@
 - Calendar and weekly insight logic are timezone-sensitive and should use the journal timezone helpers in `lib/domain/utils.ts`.
 - Shared analytics formatting also lives in `lib/domain/utils.ts`; capital buckets, readable duration strings, and date-key formatting should be fixed there first instead of patching copy in individual pages.
 - Calendar month navigation is server-driven through `buildDashboardData(...)` month keys plus the `CalendarDashboard` month arrows inside `/app`. Keep the overview page as the single calendar surface instead of reintroducing a separate calendar route.
+- Calendar `cumulative` values in month view are holistic account carryover, not month-local running totals. When rendering another month, seed the visible range from all prior closed-trade realized P/L instead of resetting at that month boundary.
 - Trade journal filters can now be saved as user-scoped presets from the `/trades` page.
 - `UserSettings` now also stores `customTradeTypes` and `customSetupTypes`, which are editable in settings and auto-extended from the trade form when a user types a new label.
 - Settings also store `insightMode`; the settings page exposes this as a select instead of burying it in env-only behavior.
